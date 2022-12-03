@@ -10,11 +10,16 @@ class App(tk.Tk):
         super().__init__()
 
         self.title("Password Generator")
-        self.resizable(True, True)
+        self.resizable(False, False)
         self.frame = tk.Frame(self)
 
         self.len_var = tk.StringVar()
         self.char_var = tk.StringVar()
+        self.lc_checkbox_var = tk.IntVar()
+        self.uc_checkbox_var = tk.IntVar()
+        self.n_checkbox_var = tk.IntVar()
+        self.sc_checkbox_var = tk.IntVar()
+        self.c_checkbox_var = tk.IntVar()
         self.create_widgets()
 
     def create_widgets(self):
@@ -29,20 +34,26 @@ class App(tk.Tk):
         len_label = tk.Label(self.frame, text="Password length")
 
         # Checkboxes
-        lc_checkbox = tk.Checkbutton(self.frame, text="Lowercase letters")
-        uc_checkbox = tk.Checkbutton(self.frame, text="Uppercase letters")
-        n_checkbox = tk.Checkbutton(self.frame, text="Numbers")
-        sc_checkbox = tk.Checkbutton(self.frame, text="Special characters (\" !\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~\")")
-        c_checkbox = tk.Checkbutton(self.frame, text="Custom set of special characters")
+        lc_checkbox = tk.Checkbutton(self.frame, text="Lowercase letters",
+            variable=self.lc_checkbox_var)
+        uc_checkbox = tk.Checkbutton(self.frame, text="Uppercase letters",
+            variable=self.uc_checkbox_var)
+        n_checkbox = tk.Checkbutton(self.frame, text="Numbers",
+            variable=self.n_checkbox_var)
+        sc_checkbox = tk.Checkbutton(self.frame,
+            text="Special characters (\" !\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~\")",
+            variable=self.sc_checkbox_var)
+        c_checkbox = tk.Checkbutton(self.frame,
+            text="Custom set of special characters",
+            variable=self.c_checkbox_var,
+            command=self.update_inputfield)
 
         # Buttons
         start_button = tk.Button(self.frame, text="Generate randomly", padx=20)
         test_button = tk.Button(self.frame, text="Generate randomly by mouse", padx=20)
 
         # Input field
-
         len_inputfield = tk.Entry(self.frame, textvariable=self.len_var)
-        char_inputfield = tk.Entry(self.frame, textvariable=self.char_var)
 
         # Showing them on screen
         label.grid(column=0, row=0, columnspan=2, pady=paddingy)
@@ -58,7 +69,16 @@ class App(tk.Tk):
         test_button.grid(column=1, row=7, padx=(0,20), pady=paddingy, sticky="e")
 
         len_inputfield.grid(column=1, row=8, pady=paddingy, sticky="w")
-        char_inputfield.grid(column=1, row=6)
+
+    def update_inputfield(self):
+        if not self.c_checkbox_var.get():
+            try:
+                self.char_inputfield.grid_forget()
+            except:
+                return
+        else:
+            self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var)
+            self.char_inputfield.grid(column=0, row=6, padx=(25, 0), sticky="w")
 
 if __name__ == "__main__":
     app = App()
