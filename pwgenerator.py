@@ -4,8 +4,10 @@ selectable set of characters
 '''
 
 import tkinter as tk
+import generator
 
 class App(tk.Tk):
+    '''Tkinter app for generating random passwords'''
     def __init__(self):
         super().__init__()
 
@@ -34,6 +36,7 @@ class App(tk.Tk):
         # Labels
         label = tk.Label(self.frame, text="Password Generator")
         len_label = tk.Label(self.frame, text="Password length")
+        self.invalid_label = tk.Label(self.frame, text="")
 
         # Checkboxes
         lc_checkbox = tk.Checkbutton(self.frame, text="Lowercase letters",
@@ -55,11 +58,14 @@ class App(tk.Tk):
         test_button = tk.Button(self.frame, text="Generate randomly by mouse", padx=20)
 
         # Input field
-        len_inputfield = tk.Entry(self.frame, textvariable=self.len_var)
+        vcmd = (self.register(self.validate_length), "%S")
+        len_inputfield = tk.Entry(self.frame, textvariable=self.len_var,
+            validate="key", validatecommand=vcmd)
 
         # Showing them on screen
         label.grid(column=0, row=0, columnspan=2, pady=paddingy)
         len_label.grid(column=0, row=8, padx=paddingx, sticky="e")
+        self.invalid_label.grid(column=1, row=4, sticky="w")
 
         lc_checkbox.grid(column=0, row=1, sticky="w")
         uc_checkbox.grid(column=0, row=2, sticky="w")
@@ -76,11 +82,31 @@ class App(tk.Tk):
         '''Updating the characters inputfield based on checkbox state'''
         if not self.c_checkbox_var.get():
             # If checkbox is off we delete the inputfield
+            self.char_inputfield.delete(0, len(self.char_inputfield.get()))
             self.char_inputfield.grid_forget()
         else:
             # If checkbox is checked we make the inputfield
-            self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var)
+            vcmd = (self.register(self.validate_characters), "%S")
+            self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var,
+                validate="key", validatecommand=vcmd)
             self.char_inputfield.grid(column=0, row=6, padx=(25, 0), sticky="w")
+
+    def validate_length(self, value):
+        '''Checks if the entered number is integer'''
+        try:
+            int(value)
+            return True
+        except:
+            self.bell()
+            return False
+
+    def validate_characters(self, value):
+        '''Checks if the entered set of special characters is good'''
+        if value in generator.special_characters:
+            return True
+        else:
+            self.bell()
+            return False
 
 if __name__ == "__main__":
     app = App()
