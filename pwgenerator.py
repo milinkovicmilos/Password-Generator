@@ -8,6 +8,8 @@ import generator
 
 class App(tk.Tk):
     '''Tkinter app for generating random passwords'''
+    MAX_PWSIZE = 256
+
     def __init__(self):
         super().__init__()
 
@@ -57,10 +59,14 @@ class App(tk.Tk):
         start_button = tk.Button(self.frame, text="Generate randomly", padx=20)
         test_button = tk.Button(self.frame, text="Generate randomly by mouse", padx=20)
 
-        # Input field
-        vcmd = (self.register(self.validate_length), "%S")
+        # Input fields
+        l_vcmd = (self.register(self.validate_length), "%S", "%d")
         len_inputfield = tk.Entry(self.frame, textvariable=self.len_var,
-            validate="key", validatecommand=vcmd)
+            validate="key", validatecommand=l_vcmd)
+
+        c_vcmd = (self.register(self.validate_characters), "%S", "%d")
+        self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var,
+                validate="key", validatecommand=c_vcmd)
 
         # Showing them on screen
         label.grid(column=0, row=0, columnspan=2, pady=paddingy)
@@ -86,17 +92,34 @@ class App(tk.Tk):
             self.char_inputfield.grid_forget()
         else:
             # If checkbox is checked we make the inputfield
-            vcmd = (self.register(self.validate_characters), "%S", "%d")
-            self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var,
-                validate="key", validatecommand=vcmd)
             self.char_inputfield.grid(column=0, row=6, padx=(25, 0), sticky="w")
 
-    def validate_length(self, value):
+    def validate_length(self, value, action):
         '''Checks if the entered number is integer'''
-        try:
-            int(value)
+        # If "0" is passed from %d percent substitution that means
+        # deletion is being made (see Tk entry page)
+        if action == "0":
             return True
+
+        length_val = self.len_var.get()
+        try:
+            # Checks if user entered valid integer
+            int(value)
+            
+            # For style purpose; so user doesn't enter 0s before actual desired
+            # password length
+            if length_val == "" and value == "0":
+                self.bell()
+                return False
+
+            # Checks if user is trying to enter password longer than specified
+            if int(self.len_var.get() + value) <= self.MAX_PWSIZE:
+                return True
+            else:
+                self.bell()
+                return False
         except:
+            # In case invalid integer is entered
             self.bell()
             return False
 
@@ -106,6 +129,7 @@ class App(tk.Tk):
         # deletion is being made (see Tk entry page)
         if action == str(0):
             return True
+
         if value in generator.special_characters and value not in self.char_inputfield.get():
             return True
         else:
