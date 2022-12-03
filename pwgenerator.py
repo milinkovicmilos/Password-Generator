@@ -9,10 +9,12 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
+        # Settings basic window parameters
         self.title("Password Generator")
         self.resizable(False, False)
         self.frame = tk.Frame(self)
 
+        # Making variables for checkboxes and inputfields
         self.len_var = tk.StringVar()
         self.char_var = tk.StringVar()
         self.lc_checkbox_var = tk.IntVar()
@@ -71,12 +73,12 @@ class App(tk.Tk):
         len_inputfield.grid(column=1, row=8, pady=paddingy, sticky="w")
 
     def update_inputfield(self):
+        '''Updating the characters inputfield based on checkbox state'''
         if not self.c_checkbox_var.get():
-            try:
-                self.char_inputfield.grid_forget()
-            except:
-                return
+            # If checkbox is off we delete the inputfield
+            self.char_inputfield.grid_forget()
         else:
+            # If checkbox is checked we make the inputfield
             self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var)
             self.char_inputfield.grid(column=0, row=6, padx=(25, 0), sticky="w")
 
