@@ -86,7 +86,7 @@ class App(tk.Tk):
             self.char_inputfield.grid_forget()
         else:
             # If checkbox is checked we make the inputfield
-            vcmd = (self.register(self.validate_characters), "%S")
+            vcmd = (self.register(self.validate_characters), "%S", "%d")
             self.char_inputfield = tk.Entry(self.frame, textvariable=self.char_var,
                 validate="key", validatecommand=vcmd)
             self.char_inputfield.grid(column=0, row=6, padx=(25, 0), sticky="w")
@@ -100,9 +100,13 @@ class App(tk.Tk):
             self.bell()
             return False
 
-    def validate_characters(self, value):
+    def validate_characters(self, value, action):
         '''Checks if the entered set of special characters is good'''
-        if value in generator.special_characters:
+        # If "0" is passed from %d percent substitution that means
+        # deletion is being made (see Tk entry page)
+        if action == str(0):
+            return True
+        if value in generator.special_characters and value not in self.char_inputfield.get():
             return True
         else:
             self.bell()
