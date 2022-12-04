@@ -31,14 +31,16 @@ class App(tk.Tk):
     def create_widgets(self):
         '''Creates widgets'''
 
-        paddingx = (10, 50)
-        paddingy = (20, 20)
+        paddingx = (10, 0)
+        paddingy = (10, 10)
         self.frame.grid()
 
         # Labels
         label = tk.Label(self.frame, text="Password Generator")
-        len_label = tk.Label(self.frame, text="Password length")
+        len_label = tk.Label(self.frame, text="Password length (max 256)")
         self.invalid_label = tk.Label(self.frame, text="")
+        self.pw_text = tk.Entry(self.frame, width=128)
+        self.pw_text.config(state="readonly")
 
         # Checkboxes
         lc_checkbox = tk.Checkbutton(self.frame, text="Lowercase letters",
@@ -56,8 +58,9 @@ class App(tk.Tk):
             command=self.update_inputfield)
 
         # Buttons
-        start_button = tk.Button(self.frame, text="Generate randomly", padx=20)
-        test_button = tk.Button(self.frame, text="Generate randomly by mouse", padx=20)
+        start_button = tk.Button(self.frame, text="Generate randomly", height=2, width=51)
+        test_button = tk.Button(self.frame, text="Generate randomly by mouse", height=2, width=51)
+        copy_button = tk.Button(self.frame, text="Copy password to clipboard", height=2, width=50)
 
         # Input fields
         l_vcmd = (self.register(self.validate_length), "%S", "%d")
@@ -70,19 +73,21 @@ class App(tk.Tk):
 
         # Showing them on screen
         label.grid(column=0, row=0, columnspan=2, pady=paddingy)
-        len_label.grid(column=0, row=8, padx=paddingx, sticky="e")
-        self.invalid_label.grid(column=1, row=4, sticky="w")
+        len_label.grid(column=0, row=6, pady=paddingy, padx=paddingx, sticky="e")
+        self.invalid_label.grid(column=0, row=7, sticky="n", columnspan=2)
+        self.pw_text.grid(column=0, row=9, columnspan=2, pady=(20, 10), padx=(20, 20))
 
-        lc_checkbox.grid(column=0, row=1, sticky="w")
-        uc_checkbox.grid(column=0, row=2, sticky="w")
-        n_checkbox.grid(column=0, row=3, sticky="w")
-        sc_checkbox.grid(column=0, row=4, sticky="w")
-        c_checkbox.grid(column=0, row=5, sticky="w")
+        lc_checkbox.grid(column=0, row=1, padx=paddingx, sticky="w")
+        uc_checkbox.grid(column=0, row=2, padx=paddingx, sticky="w")
+        n_checkbox.grid(column=0, row=3, padx=paddingx, sticky="w")
+        sc_checkbox.grid(column=0, row=4, padx=paddingx, sticky="w")
+        c_checkbox.grid(column=0, row=5, padx=paddingx, sticky="w")
 
-        start_button.grid(column=0, row=7, padx=paddingx, pady=paddingy, sticky="w")
-        test_button.grid(column=1, row=7, padx=(0,20), pady=paddingy, sticky="e")
+        start_button.grid(column=0, row=8, pady=paddingy, sticky="n")
+        test_button.grid(column=1, row=8, pady=paddingy, sticky="n")
+        copy_button.grid(column=0, row=10, pady=(2, 20), columnspan=2, sticky="n")
 
-        len_inputfield.grid(column=1, row=8, pady=paddingy, sticky="w")
+        len_inputfield.grid(column=1, row=6, pady=(5, 5), sticky="w")
 
     def update_inputfield(self):
         '''Updating the characters inputfield based on checkbox state'''
@@ -92,7 +97,7 @@ class App(tk.Tk):
             self.char_inputfield.grid_forget()
         else:
             # If checkbox is checked we make the inputfield
-            self.char_inputfield.grid(column=0, row=6, padx=(25, 0), sticky="w")
+            self.char_inputfield.grid(column=0, row=6, padx=(35, 0), sticky="w")
 
     def validate_length(self, value, action):
         '''Checks if the entered number is integer'''
@@ -105,7 +110,7 @@ class App(tk.Tk):
         try:
             # Checks if user entered valid integer
             int(value)
-            
+
             # For style purpose; so user doesn't enter 0s before actual desired
             # password length
             if length_val == "" and value == "0":
