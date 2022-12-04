@@ -64,7 +64,8 @@ class App(tk.Tk):
         start_button = tk.Button(self.frame, text="Generate randomly",
             command=self.generate_randomly, height=2, width=51)
         test_button = tk.Button(self.frame, text="Generate randomly by mouse", height=2, width=51)
-        copy_button = tk.Button(self.frame, text="Copy password to clipboard", height=2, width=50)
+        copy_button = tk.Button(self.frame, text="Copy password to clipboard",
+            command=self.copy_to_clipboard, height=2, width=50)
 
         # Input fields
         l_vcmd = (self.register(self.validate_length), "%S", "%d")
@@ -157,23 +158,38 @@ class App(tk.Tk):
             return False
 
     def generate_randomly(self):
+        # Getting the value of length inputfield
         length = self.len_var.get()
+        # Used to determine special characters that are going to be used
         chars = ""
+        
+        # Making a array of checkbox values
         x = []
         x.append(self.lc_checkbox_var.get())
         x.append(self.uc_checkbox_var.get())
         x.append(self.n_checkbox_var.get())
+
+        # Adding special characters
         if self.sc_checkbox_var.get():
             chars = generator.SPECIAL_CHARACTERS
         else:
             chars = self.char_inputfield.get()
+            
+        # Making sure that at least one checkbox is selected and that
+        # length of desired password is entered
         if length != "" and (1 in x or self.sc_checkbox_var.get() or chars != ""):
-            print(x)
+            # Generating password
             password = generator.create_password(int(length), x, chars)
+            # Changing the value of password
             self.pw_text.config(state="normal")
             self.pw_text.delete(0, len(self.pw_text.get()))
             self.pw_text.insert(0, password)
             self.pw_text.config(state="readonly")
+
+    def copy_to_clipboard(self):
+        password = self.pw_text.get()
+        self.clipboard_clear()
+        self.clipboard_append(password)
 
 if __name__ == "__main__":
     app = App()
