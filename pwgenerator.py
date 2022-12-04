@@ -39,7 +39,7 @@ class App(tk.Tk):
         label = tk.Label(self.frame, text="Password Generator")
         len_label = tk.Label(self.frame, text="Password length (max 256)")
         self.invalid_label = tk.Label(self.frame, text="")
-        self.pw_text = tk.Entry(self.frame, width=128)
+        self.pw_text = tk.Entry(self.frame, width=128, justify="center")
         self.pw_text.config(state="readonly")
 
         # Checkboxes
@@ -49,16 +49,20 @@ class App(tk.Tk):
             variable=self.uc_checkbox_var)
         n_checkbox = tk.Checkbutton(self.frame, text="Numbers",
             variable=self.n_checkbox_var)
-        sc_checkbox = tk.Checkbutton(self.frame,
+        self.sc_checkbox = tk.Checkbutton(
+            self.frame,
             text="Special characters (\" !\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~\")",
-            variable=self.sc_checkbox_var)
-        c_checkbox = tk.Checkbutton(self.frame,
+            variable=self.sc_checkbox_var,
+            command=self.update_checkbox)
+        self.c_checkbox = tk.Checkbutton(
+            self.frame,
             text="Custom set of special characters",
             variable=self.c_checkbox_var,
             command=self.update_inputfield)
 
         # Buttons
-        start_button = tk.Button(self.frame, text="Generate randomly", height=2, width=51)
+        start_button = tk.Button(self.frame, text="Generate randomly",
+            command=self.generate_randomly, height=2, width=51)
         test_button = tk.Button(self.frame, text="Generate randomly by mouse", height=2, width=51)
         copy_button = tk.Button(self.frame, text="Copy password to clipboard", height=2, width=50)
 
@@ -80,8 +84,8 @@ class App(tk.Tk):
         lc_checkbox.grid(column=0, row=1, padx=paddingx, sticky="w")
         uc_checkbox.grid(column=0, row=2, padx=paddingx, sticky="w")
         n_checkbox.grid(column=0, row=3, padx=paddingx, sticky="w")
-        sc_checkbox.grid(column=0, row=4, padx=paddingx, sticky="w")
-        c_checkbox.grid(column=0, row=5, padx=paddingx, sticky="w")
+        self.sc_checkbox.grid(column=0, row=4, padx=paddingx, sticky="w")
+        self.c_checkbox.grid(column=0, row=5, padx=paddingx, sticky="w")
 
         start_button.grid(column=0, row=8, pady=paddingy, sticky="n")
         test_button.grid(column=1, row=8, pady=paddingy, sticky="n")
@@ -96,8 +100,19 @@ class App(tk.Tk):
             self.char_inputfield.delete(0, len(self.char_inputfield.get()))
             self.char_inputfield.grid_forget()
         else:
-            # If checkbox is checked we make the inputfield
+            # If checkbox is checked we make the inputfield and disable the
+            # checkbox that indicates use of all special characters
             self.char_inputfield.grid(column=0, row=6, padx=(35, 0), sticky="w")
+            self.sc_checkbox.deselect()
+
+    def update_checkbox(self):
+        '''Updating when special characters checkbox is being checked'''
+        if self.sc_checkbox_var.get():
+            # If checkbox is on we delete the inputfield and deselect the checkbox
+            # for custom selected characters
+            self.char_inputfield.delete(0, len(self.char_inputfield.get()))
+            self.char_inputfield.grid_forget()
+            self.c_checkbox.deselect()
 
     def validate_length(self, value, action):
         '''Checks if the entered number is integer'''
@@ -135,11 +150,30 @@ class App(tk.Tk):
         if action == str(0):
             return True
 
-        if value in generator.special_characters and value not in self.char_inputfield.get():
+        if value in generator.SPECIAL_CHARACTERS and value not in self.char_inputfield.get():
             return True
         else:
             self.bell()
             return False
+
+    def generate_randomly(self):
+        length = self.len_var.get()
+        chars = ""
+        x = []
+        x.append(self.lc_checkbox_var.get())
+        x.append(self.uc_checkbox_var.get())
+        x.append(self.n_checkbox_var.get())
+        if self.sc_checkbox_var.get():
+            chars = generator.SPECIAL_CHARACTERS
+        else:
+            chars = self.char_inputfield.get()
+        if length != "" and (1 in x or self.sc_checkbox_var.get() or chars != ""):
+            print(x)
+            password = generator.create_password(int(length), x, chars)
+            self.pw_text.config(state="normal")
+            self.pw_text.delete(0, len(self.pw_text.get()))
+            self.pw_text.insert(0, password)
+            self.pw_text.config(state="readonly")
 
 if __name__ == "__main__":
     app = App()
