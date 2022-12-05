@@ -21,6 +21,7 @@ class App(tk.Tk):
         # Making variables for checkboxes and inputfields
         self.len_var = tk.StringVar()
         self.char_var = tk.StringVar()
+        self.info_var = tk.StringVar()
         self.lc_checkbox_var = tk.IntVar()
         self.uc_checkbox_var = tk.IntVar()
         self.n_checkbox_var = tk.IntVar()
@@ -38,7 +39,7 @@ class App(tk.Tk):
         # Labels
         label = tk.Label(self.frame, text="Password Generator")
         len_label = tk.Label(self.frame, text="Password length (max 256)")
-        self.invalid_label = tk.Label(self.frame, text="")
+        self.info_label = tk.Label(self.frame, text="", textvariable=self.info_var)
         self.pw_text = tk.Entry(self.frame, width=128, justify="center")
         self.pw_text.config(state="readonly")
 
@@ -63,7 +64,8 @@ class App(tk.Tk):
         # Buttons
         start_button = tk.Button(self.frame, text="Generate randomly",
             command=self.generate_randomly, height=2, width=51)
-        test_button = tk.Button(self.frame, text="Generate randomly by mouse", height=2, width=51)
+        start2_button = tk.Button(self.frame, text="Generate randomly by mouse",
+            command=self.generate_randomly_mouse, height=2, width=51)
         copy_button = tk.Button(self.frame, text="Copy password to clipboard",
             command=self.copy_to_clipboard, height=2, width=50)
 
@@ -79,7 +81,7 @@ class App(tk.Tk):
         # Showing them on screen
         label.grid(column=0, row=0, columnspan=2, pady=paddingy)
         len_label.grid(column=0, row=6, pady=paddingy, padx=paddingx, sticky="e")
-        self.invalid_label.grid(column=0, row=7, sticky="n", columnspan=2)
+        self.info_label.grid(column=0, row=7, sticky="n", columnspan=2)
         self.pw_text.grid(column=0, row=9, columnspan=2, pady=(20, 10), padx=(20, 20))
 
         lc_checkbox.grid(column=0, row=1, padx=paddingx, sticky="w")
@@ -89,7 +91,7 @@ class App(tk.Tk):
         self.c_checkbox.grid(column=0, row=5, padx=paddingx, sticky="w")
 
         start_button.grid(column=0, row=8, pady=paddingy, sticky="n")
-        test_button.grid(column=1, row=8, pady=paddingy, sticky="n")
+        start2_button.grid(column=1, row=8, pady=paddingy, sticky="n")
         copy_button.grid(column=0, row=10, pady=(2, 20), columnspan=2, sticky="n")
 
         len_inputfield.grid(column=1, row=6, pady=(5, 5), sticky="w")
@@ -157,34 +159,75 @@ class App(tk.Tk):
             self.bell()
             return False
 
-    def generate_randomly(self):
+    def validate_run(self):
+        '''
+        Used to check if at least one option for characters is selected
+        and that desired length of password is valid and not 0
+        '''
         # Getting the value of length inputfield
         length = self.len_var.get()
+        # Making a array of checkbox values
+        checks = []
+        checks.append(self.lc_checkbox_var.get())
+        checks.append(self.uc_checkbox_var.get())
+        checks.append(self.n_checkbox_var.get())
+
         # Used to determine special characters that are going to be used
         chars = ""
-        
-        # Making a array of checkbox values
-        x = []
-        x.append(self.lc_checkbox_var.get())
-        x.append(self.uc_checkbox_var.get())
-        x.append(self.n_checkbox_var.get())
 
         # Adding special characters
         if self.sc_checkbox_var.get():
             chars = generator.SPECIAL_CHARACTERS
         else:
             chars = self.char_inputfield.get()
-            
-        # Making sure that at least one checkbox is selected and that
-        # length of desired password is entered
-        if length != "" and (1 in x or self.sc_checkbox_var.get() or chars != ""):
+
+        rtrn_val = {
+            "valid" : False,
+            "length" : length,
+            "checks" : checks,
+            "chars" : chars
+        }
+        if length != "" and (1 in checks or chars != ""):
+            rtrn_val["valid"] = True
+
+        return rtrn_val
+
+    def generate_randomly(self):
+        '''Used by generate randomly button'''
+        validate = self.validate_run()
+        if validate["valid"]:
             # Generating password
-            password = generator.create_password(int(length), x, chars)
+            password = generator.create_password(int(validate["length"]),
+                                                validate["checks"], validate["chars"])
             # Changing the value of password
             self.pw_text.config(state="normal")
             self.pw_text.delete(0, len(self.pw_text.get()))
             self.pw_text.insert(0, password)
             self.pw_text.config(state="readonly")
+        else:
+            self.bell()
+
+    def generate_randomly_mouse(self):
+        '''Used by generate randomly by mouse button'''
+        validate = self.validate_run()
+        if validate["valid"]:
+            # Generating password
+            self.info_var.set("Keep moving mouse to create random password")
+            # Making a function to call after first waiting for info label to show
+            def make_pw():
+                password = ""
+                for i in range(int(validate["length"])):
+                    password += generator.create_password_mouse(validate["checks"],
+                                                                validate["chars"])
+                # Changing the value of password
+                self.pw_text.config(state="normal")
+                self.pw_text.delete(0, len(self.pw_text.get()))
+                self.pw_text.insert(0, password)
+                self.pw_text.config(state="readonly")
+                self.info_var.set("")
+            self.info_label.after(100, make_pw)
+        else:
+            self.bell()
 
     def copy_to_clipboard(self):
         password = self.pw_text.get()
