@@ -27,6 +27,7 @@ class App(tk.Tk):
         self.n_checkbox_var = tk.IntVar()
         self.sc_checkbox_var = tk.IntVar()
         self.c_checkbox_var = tk.IntVar()
+        self.show_hide_var = tk.IntVar()
         self.create_widgets()
 
     def create_widgets(self):
@@ -60,6 +61,9 @@ class App(tk.Tk):
             text="Custom set of special characters",
             variable=self.c_checkbox_var,
             command=self.update_inputfield)
+        self.show_hide_check = tk.Checkbutton(self.frame, text="Hide password",
+            variable=self.show_hide_var,
+            command=self.update_pw)
 
         # Buttons
         start_button = tk.Button(self.frame, text="Generate randomly",
@@ -89,12 +93,21 @@ class App(tk.Tk):
         n_checkbox.grid(column=0, row=3, padx=paddingx, sticky="w")
         self.sc_checkbox.grid(column=0, row=4, padx=paddingx, sticky="w")
         self.c_checkbox.grid(column=0, row=5, padx=paddingx, sticky="w")
+        self.show_hide_check.grid(column=0, row=10, padx=paddingx, sticky="w")
 
         start_button.grid(column=0, row=8, pady=paddingy, sticky="n")
         start2_button.grid(column=1, row=8, pady=paddingy, sticky="n")
         copy_button.grid(column=0, row=10, pady=(2, 20), columnspan=2, sticky="n")
 
         len_inputfield.grid(column=1, row=6, pady=(5, 5), sticky="w")
+
+    def update_pw(self):
+        if self.show_hide_var.get():
+            self.show_hide_check.configure(text="Show password")
+            self.pw_text.configure(show='*')
+        else:
+            self.show_hide_check.configure(text="Hide password")
+            self.pw_text.configure(show='')
 
     def update_inputfield(self):
         '''Updating the characters inputfield based on checkbox state'''
