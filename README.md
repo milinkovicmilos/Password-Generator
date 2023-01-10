@@ -9,7 +9,7 @@ Application for generating random passwords with Graphical User Interface made w
 Application is started by running pwgenerator.py.
 First user needs to select characters that are gonna be used in password.
 After that user should provide desired length of password.
-After that Password can be created in two ways :
+After that Password can be created in two ways:
   1. By using time based pseudo-randomness
   2. By inputing mouse position thats going to be used as seed every 50ms
 
